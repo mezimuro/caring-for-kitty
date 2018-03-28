@@ -3,7 +3,7 @@
  Graphics.pde
  ============================================================
  
- Collection of meaningful visual elements and animations for 
+ Collection of meaningful and animated graphic elements for 
  onscreen usage.
  
  
@@ -15,13 +15,13 @@
 color bgColor;
 
 
-// ##########################################################
+// #############################################################################
 
 // KittyTheCat states
 static final int HAPPY = 0;
 static final int SAD = 1;  
 
-class GKittyTheCat extends VisElem {  
+class GKittyTheCat extends GraphicElement {  
   int state;
   ArrayList<PImage> imgs = new ArrayList<PImage>();
 
@@ -48,9 +48,9 @@ class GKittyTheCat extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
-class GInfoBoard extends VisElem {
+class GInfoBoard extends GraphicElement {
 
   GInfoBoard(float x, float y) {  // origin is window's origin
     super(x, y);
@@ -67,13 +67,13 @@ class GInfoBoard extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
 // GBarChart animations
 static final int BLINK = 0;
 static final int GROW = 1;  
 
-class GBarChart extends VisElem { 
+class GBarChart extends GraphicElement { 
   float barHeight = 0.0;    
   boolean barVisible = true;  
   int barGrowDirection = 1;
@@ -99,10 +99,10 @@ class GBarChart extends VisElem {
     }
 
     fill(0);
-    textFont(font_primary, 14);
+    textFont(fonts.get("primary"), 14);
     text("Glucose Level", 28, 16);
 
-    textFont(font_primary, 12);
+    textFont(fonts.get("primary"), 12);
     text("mg/dl", 11, -170);
     textAlign(RIGHT);
     text("0", 12, 3);
@@ -122,11 +122,11 @@ class GBarChart extends VisElem {
   }
 
 
-  class AnimationBlink extends VisElemAnimation {
+  class AnimationBlink extends GraphicElementAnimation {
     void handler() {  
       float freq = (float)params[0];  // blinking frequency in Hz
 
-      if ((frameCount / ceil(FRAMERATE/2/freq)) % 2 == 0)
+      if ((frameCount / ceil(60/2/freq)) % 2 == 0)
         barVisible = true;
       else
         barVisible = false;
@@ -137,7 +137,7 @@ class GBarChart extends VisElem {
     }
   }
 
-  class AnimationGrow extends VisElemAnimation {   
+  class AnimationGrow extends GraphicElementAnimation {   
     float from, to, limit;   
     float d;  // calculated increment
     int timer;
@@ -146,8 +146,8 @@ class GBarChart extends VisElem {
       from = mapLevel((float)params[0]); 
       to = mapLevel((float)params[1]); 
       float time = (float)params[2];
-      d = abs((from-to) / (time * FRAMERATE));
-      limit = time * FRAMERATE;
+      d = abs((from-to) / (time * 60));
+      limit = time * 60;
       timer = 0;
 
       barGrowDirection = (from <= to) ? 1 : -1;
@@ -165,12 +165,12 @@ class GBarChart extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
 // GHeart animations
 static final int HEARTBEAT = 0;
 
-class GHeart extends VisElem {
+class GHeart extends GraphicElement {
   int pulseRate;
 
   GHeart(float x, float y, int pulseRate) {
@@ -181,8 +181,9 @@ class GHeart extends VisElem {
 
   void drawElement() {
     smooth();
+    fill(240, 30, 50);  
     noStroke();
-    fill(240, 30, 50);       
+      
     beginShape();
     vertex(50, 15);
     bezierVertex(50, -5, 90, 5, 50, 40);
@@ -196,7 +197,7 @@ class GHeart extends VisElem {
   }
 
 
-  class AnimationHeartbeat extends VisElemAnimation {   
+  class AnimationHeartbeat extends GraphicElementAnimation {   
     int timer;
 
     void pre() {
@@ -214,16 +215,16 @@ class GHeart extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
-class GKeysChart extends VisElem {
+class GKeysChart extends GraphicElement {
 
   GKeysChart(float x, float y) {
     super(x, y);
   }
 
   void drawElement() {  
-    textFont(font_debug, 14);
+    textFont(fonts.get("debug"), 14);
     fill(30);
     text("KEYS CHART", -5, 1);
 
@@ -234,7 +235,7 @@ class GKeysChart extends VisElem {
       rect(100+i*25, -15, 20, 20, 4);
 
       fill(120);
-      textFont(font_debug, 12);
+      textFont(fonts.get("debug"), 12);
       text(i+1, 106+i*25, 0);
     }
 
@@ -254,7 +255,7 @@ class GKeysChart extends VisElem {
     text("D", 401, 0);
 
     fill(30);  
-    textFont(font_debug, 10.4);
+    textFont(fonts.get("debug"), 10.4);
     text("Steps", 190, -22);
     text("Context Action", 301, -22); 
     text("Debug", 390, -22);   
@@ -264,28 +265,30 @@ class GKeysChart extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
-// GStartScreen states
+// GOverlay states
 static final int WELCOME = 0;
 static final int ENTER_CAT_NAME = 1;  
 static final int CONGRATULATIONS = 2;  
 
 
-class GStartScreen extends VisElem {
+class GOverlay extends GraphicElement {
   int state;
 
-  GStartScreen() {
+  GOverlay() {
     super(0, 0);
     this.state = WELCOME;
   }
 
   void drawElement() {  
+    String catName = ((String)settings.get("cat_name"));
+
     noStroke();
     if (state != CONGRATULATIONS)
       fill(255, 241);
     else
-      fill(BG_JASMINE, 245);
+      fill(JASMINE, 245);
 
     rect(0, 0, width, height);
     fill(0, 94);
@@ -298,11 +301,11 @@ class GStartScreen extends VisElem {
     switch (state) {
     case WELCOME:
       fill(255);
-      textFont(font_primary, 40);
+      textFont(fonts.get("primary"), 40);
       text("WELCOME", width/2, 203);
 
       fill(255);
-      textFont(font_primary, 18); 
+      textFont(fonts.get("primary"), 18); 
       text("[Text that introduces type one diabetes\nand the basics of the game]", width/2, 269);
 
       break;
@@ -310,13 +313,13 @@ class GStartScreen extends VisElem {
 
     case ENTER_CAT_NAME:
       fill(255);
-      textFont(font_primary, 40);
+      textFont(fonts.get("primary"), 40);
       text("ENTER CAT'S NAME", width/2, 200);
 
       pushMatrix();
       translate(0, -69);
 
-      textFont(font_primary, 35);
+      textFont(fonts.get("primary"), 35);
       text(catName + " ", width/2, 410.5);
 
       if (((frameCount/15) % 2) == 0)
@@ -331,13 +334,13 @@ class GStartScreen extends VisElem {
 
     case CONGRATULATIONS : 
       fill(255); 
-      textFont(font_primary, 30); 
+      textFont(fonts.get("primary"), 30); 
       text("* CERTIFICATE OF COMPLETION *", width/2, 200); 
 
-      textFont(font_primary, 36); 
+      textFont(fonts.get("primary"), 36); 
       text("Game Passed!", width/2, 340); 
 
-      textFont(font_primary, 18); 
+      textFont(fonts.get("primary"), 18); 
       text(catName + " is happy and healthy and you are\nwell informed on type one diabetes!", width/2, 394); 
 
       break;
@@ -348,9 +351,9 @@ class GStartScreen extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
-class GText extends VisElem {
+class GText extends GraphicElement {
   String text; 
   PFont font; 
   int fontSize; 
@@ -360,18 +363,17 @@ class GText extends VisElem {
     super(x, y);
   }
 
-  GText(float x, float y, PFont font, int fontSize, color fontColor) {
+  GText(float x, float y, PFont font, int fontSize, color fontColor, String text) {
     super(x, y); 
     this.font = font; 
     this.fontSize = fontSize; 
     this.fontColor = fontColor;
-  }
-
-  GText(float x, float y, PFont font, int fontSize, color fontColor, String text) {
-    this(x, y, font, fontSize, fontColor); 
     this.text = text;
   }
 
+  GText(float x, float y, PFont font, int fontSize, color fontColor) {
+    this(x, y, font, fontSize, fontColor, "");
+  }
 
   void drawElement() {
     fill(fontColor); 
@@ -381,9 +383,9 @@ class GText extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
-class GPressEnter extends VisElem {
+class GPressEnter extends GraphicElement {
 
   GPressEnter() {
     super(0, 0);
@@ -400,16 +402,16 @@ class GPressEnter extends VisElem {
       fill(0, 0); 
 
     textAlign(CENTER); 
-    textFont(font_primary, 24); 
+    textFont(fonts.get("primary"), 24); 
     text("Press Enter to continue", width/2, 0); 
     textAlign(LEFT);
   }
 }
 
 
-// ##########################################################
+// #############################################################################
 
-class GSyringe extends VisElem {
+class GSyringe extends GraphicElement {
   float opacity; 
   int fadeDirection; 
   PImage img; 
@@ -435,18 +437,18 @@ class GSyringe extends VisElem {
       fadeDirection = 1; 
 
     fill(0, opacity); 
-    textFont(font_primary, 40); 
+    textFont(fonts.get("primary"), 40); 
     text("Injecting insulin...", 72, 216);
   }
 }
 
 
-// ##########################################################
+// #############################################################################
 
 // GNurse animations
 static final int APPEARING = 0; 
 
-class GNurse extends VisElem {
+class GNurse extends GraphicElement {
   float opacity; 
   PImage img; 
   float defaultX; 
@@ -465,7 +467,7 @@ class GNurse extends VisElem {
     image(img, 0, 0);
   }
 
-  class AnimationAppearing extends VisElemAnimation {   
+  class AnimationAppearing extends GraphicElementAnimation {   
     int timer; 
     float targetX; 
 
@@ -493,13 +495,13 @@ class GNurse extends VisElem {
 }
 
 
-// ##########################################################
+// #############################################################################
 
-class GFood extends VisElem {
+class GCatFood extends GraphicElement {
   float opacity; 
   PImage img; 
 
-  GFood(float x, float y) {
+  GCatFood(float x, float y) {
     super(x, y); 
     this.opacity = 0; 
     this.img = loadImage("images/food.png"); 
@@ -517,4 +519,24 @@ class GFood extends VisElem {
   }
 }
 
-// ##########################################################
+
+// #############################################################################
+
+class GDebug extends GraphicElement {
+
+  GDebug() {
+    super(0, 0);
+  }
+
+  void drawElement() {
+    fill(30);
+    textFont(fonts.get("debug"), 12);
+
+    text("FPS: " + round(frameRate), 5, 15);
+    text("mouseX: " + (mouseX) + ", mouseY: " + (mouseY), 5, 35);
+    text("sensors: slider=" + sensors.slider + ", proximity=" + sensors.proximity + ", force=" + sensors.force, 5, 55);
+  }
+}
+
+
+// #############################################################################

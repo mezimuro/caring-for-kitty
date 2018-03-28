@@ -66,6 +66,9 @@ class Sensors {
   }
 
   void read() {
+    if ((boolean)settings.get("sensors_enabled") == false)
+      return;
+
     if (0 < port.available()) { 
       port.readBytesUntil('&', buf);  //read in all data until '&' is encountered
 
@@ -154,5 +157,9 @@ class Sensors {
 
     if (proximity > 0.0) 
       initialized = true;
+  }
+  
+  void reset() {
+    proximityEvent = false;  
   }
 }

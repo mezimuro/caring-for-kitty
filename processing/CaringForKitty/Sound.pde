@@ -3,8 +3,10 @@
  Sound.pde
  ============================================================
  
- Organizes audio-related code into simple and handy interface 
- to create audio events as necessary.
+ Simple monophonic sound player. 
+ 
+ Table soundNames lists names of .mp3 files that should be 
+ loaded.
  
  Requires "Sound" library to be installed, in order to work.
  
@@ -14,41 +16,38 @@
  
  */
 
-import processing.sound.*; 
+import processing.sound.SoundFile; 
 
 
-// Kinds of cat sounds
-static final int MEOW_SHORT = 0;
-static final int MEOW_LOUD = 1;
-static final int PURRING = 2;
-static final int MEOW_ANGRY = 3;
-static final int MEOW_CURIOUS = 4;
-static final int KEYSTROKE = 5;
-static final int KEYSTROKE_WRONG = 6;
-static final int FANFARES = 7;
+static final String[] soundNames = {
+  "fanfares", 
+  "keystroke", 
+  "keystroke_error", 
+  "meow_angry", 
+  "meow_loud", 
+  "meow_short", 
+  "purring", 
+  "squealing"
+};
+
 
 class SoundPlayer {
 
-  ArrayList<SoundFile> sounds = new ArrayList<SoundFile>();
+  Map<String, SoundFile> sounds = new HashMap<String, SoundFile>();
 
-  void preload() {
-    sounds.add(new SoundFile(applet, "sounds/Meow-sound-3.wav"));
-    sounds.add(new SoundFile(applet, "sounds/Cat-meowing-loudly.mp3"));    
-    sounds.add(new SoundFile(applet, "sounds/Cat-purring-sound.wav"));
-    sounds.add(new SoundFile(applet, "sounds/Angry-cat-sounds.mp3"));
-    sounds.add(new SoundFile(applet, "sounds/Cat-meows-and-purring-sound.mp3"));
-    sounds.add(new SoundFile(applet, "sounds/Typing On Keyboard-SoundBible.com-1459197142.mp3"));
-    sounds.add(new SoundFile(applet, "sounds/Computer Error-SoundBible.com-399240903.mp3"));
-    sounds.add(new SoundFile(applet, "sounds/Ta Da-SoundBible.com-1884170640.mp3"));
+  SoundPlayer() {
+    for (String soundName : soundNames)
+      sounds.put(soundName, new SoundFile(applet, "sounds/" + soundName + ".mp3"));
   }
 
-  void play(int soundId, float volume) {
-    if (SOUND_ENABLED) {
-      for (SoundFile sound : soundPlayer.sounds)  
-        sound.stop();
+  void play(String soundName, float volume) {
+    if ((boolean)settings.get("sound_enabled") == false)
+      return;
 
-      soundPlayer.sounds.get(soundId).play();
-      soundPlayer.sounds.get(soundId).amp(volume);
-    }
+    for (SoundFile sound : sounds.values())  
+      sound.stop();
+
+    soundPlayer.sounds.get(soundName).play();
+    soundPlayer.sounds.get(soundName).amp(volume);
   }
 }
