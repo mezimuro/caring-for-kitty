@@ -20,12 +20,17 @@ abstract class GraphicElement {
   // Stores scaling coefficient to control element's onscreen size
   float scaleFactor = 1.0; 
 
+  // Allows element to be stateful
+  String state;
+
   // Visibility switch to make element hidden if needed
   boolean visible = true;
 
-  // Stores supported animations, using animation codes as indexes
-  ArrayList<GraphicElementAnimation> anims = new ArrayList<GraphicElementAnimation>();
+  // Stores raster images that can be used by element
+  Map<String, PImage> images = new HashMap();  
 
+  // Stores supported animations, using animation ids as indexes
+  Map<String, GraphicElementAnimation> anims = new HashMap();
 
   GraphicElement(float x, float y) {
     this.pos = new PVector(x, y);
@@ -37,25 +42,39 @@ abstract class GraphicElement {
     this.scaleFactor = scaleFactor;
   }
 
+  // Another constructor variant 
+  GraphicElement(float x, float y, float scaleFactor, String state) {
+    this(x, y, scaleFactor);
+    this.state = state;
+  }
+
+  // Computes animations for a new frame
   void processAnimations() {
-    for (GraphicElementAnimation anim : anims)   
+    for (GraphicElementAnimation anim : anims.values())   
       if (anim.playing)
         anim.handler();
   }
 
-  void playAnim(int animCode, Object... args) {
-    GraphicElementAnimation anim = anims.get(animCode);
+  void playAnim(String animId, Object... args) {
+    GraphicElementAnimation anim = anims.get(animId);
 
     anim.params = args;
     anim.pre();
     anim.playing = true;
   }
 
-  void stopAnim(int animCode) {
-    GraphicElementAnimation anim = anims.get(animCode);
+  void stopAnim(String animId) {
+    GraphicElementAnimation anim = anims.get(animId);
 
     anim.playing = false;
     anim.clean();
+  }
+
+  // If called without arguments, stops all animations
+  void stopAnim() {
+    for (String animId : anims.keySet())   
+      if (anims.get(animId).playing)
+        stopAnim(animId);
   }
 
   // Master rendering code
@@ -85,6 +104,9 @@ abstract class GraphicElementAnimation {
 
   // Stores animation's parameters
   Object[] params;
+  
+  // Built-in timer
+  long timer;
 
   // Actual animation code
   abstract void handler();

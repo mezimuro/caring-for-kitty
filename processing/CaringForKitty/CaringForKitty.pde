@@ -20,19 +20,20 @@ final PApplet applet = this;
 // #############################################################################
 // ## Constants ################################################################
 
-static enum Step {
+enum Step {
   START_SCREEN, ENTER_CAT_NAME, FEEDING, INSULIN, EMERGENCY, CONGRATULATIONS
 }
 
-static enum State {
+enum State {
   IDLE, ACTION_EXECUTING, ACTION_DONE
 }
 
-static final color WHITE = #FFFFFF;
-static final color SKYBLUE = #A8D6ED;
-static final color LIGHTGREEN = #A7F1C7;
-static final color APRICOT = #FBCEB1;
-static final color JASMINE = #F8DE7E;
+static final color COL_WHITE = #FFFFFF;
+static final color COL_SKYBLUE = #A8D6ED;
+static final color COL_LIGHTGREEN = #A7F1C7;
+static final color COL_APRICOT = #FBCEB1;
+static final color COL_JASMINE = #F8DE7E;
+static final color COL_STRAWBERRY = #D14152;
 
 
 // #############################################################################
@@ -68,15 +69,16 @@ void setup() {
   settings.put("lock_controls", false);  
   settings.put("cat_name", "Kitty The Cat");  // Default
 
-  frameRate((int)settings.get("framerate"));
-
+  fr = (int)settings.get("framerate");
+  frameRate(fr);
+  
   fonts = new HashMap();    
   fonts.put("primary", loadFont("fonts/Skia-Regular_Black-26.vlw"));
   fonts.put("debug", loadFont("fonts/LucidaSans-12.vlw"));
 
   // Insertion order defines elements' z-index (order of draw)
   graphics = new LinkedHashMap();
-  graphics.put("kitty", new GKittyTheCat(282, 319, 0.5, SAD));
+  graphics.put("kitty", new GKittyTheCat(282, 319, 0.5, "sad"));
   graphics.put("infoboard", new GInfoBoard(0, 0));
   graphics.put("barchart", new GBarChart(500, 282));
   graphics.put("heart", new GHeart(695, 167, 98));
@@ -114,7 +116,6 @@ void draw() {
       element.visible = false;  
 
   // Shortcuts for convenience
-  int fr = (int)settings.get("framerate");
   boolean sensors_enabled = (boolean)settings.get("sensors_enabled");
   String catName = ((String)settings.get("cat_name"));
   GKittyTheCat kitty = ((GKittyTheCat)graphics.get("kitty"));
@@ -130,13 +131,13 @@ void draw() {
   switch (step) { 
   case START_SCREEN:  
     if (!stepSet) {
-      bgColor = WHITE;
+      bgColor = COL_WHITE;
 
       for (String elementKey : visibleSets.get("with_overlay"))
         graphics.get(elementKey).visible = true; 
 
-      kitty.state = SAD; 
-      overlay.state = WELCOME; 
+      kitty.state = "sad"; 
+      overlay.state = "welcome"; 
       pressEnter.pos.y = 619; 
 
       stepSet = true;
@@ -148,13 +149,13 @@ void draw() {
 
   case ENTER_CAT_NAME: 
     if (!stepSet) {
-      bgColor = WHITE; 
+      // bgColor = BgColor.WHITE.ordinal();
 
       for (String elementKey : visibleSets.get("with_overlay"))
         graphics.get(elementKey).visible = true;     
 
-      kitty.state = SAD; 
-      overlay.state = ENTER_CAT_NAME; 
+      kitty.state = "sad"; 
+      overlay.state = "enter_cat_name";
       pressEnter.pos.y = 619; 
 
       stepSet = true;
@@ -167,18 +168,18 @@ void draw() {
   case FEEDING: 
     // Initial screen
     if (!stepSet) {
-      bgColor = SKYBLUE; 
+      bgColor = COL_SKYBLUE;
 
       for (String elementKey : visibleSets.get("normal"))
         graphics.get(elementKey).visible = true;     
 
       glucoseLevel = 70;  // mg/dl
 
-      kitty.state = SAD; 
+      kitty.state = "sad"; 
       barChart.setLevel(glucoseLevel); 
-      barChart.playAnim(BLINK, 2.0); 
+      barChart.playAnim("blink", 2.0); 
       heart.pulseRate = 140; // bpm
-      heart.playAnim(HEARTBEAT); 
+      heart.playAnim("heartbeat"); 
       prompt.text = "It has been 3 hours since " + catName +  " last ate and her" + 
         " blood sugar levels have\ndropped down to 70mg/dl.\n\nFeed " + catName + 
         " a healthy snack to raise her blood glucose levels."; 
@@ -202,8 +203,8 @@ void draw() {
         if (timer == 0) {
           snack.opacity = 0;
           snack.visible = true;            
-          barChart.stopAnim(BLINK); 
-          barChart.playAnim(GROW, 70.0, 90.0, 4.0); 
+          barChart.stopAnim(); 
+          barChart.playAnim("grow", 70.0, 90.0, 4.0); 
           prompt.text = "Looks like there is some food!\nEating..."; 
 
           settings.put("lock_controls", true);
@@ -213,7 +214,7 @@ void draw() {
         if (timer == 4*fr) { // 4 seconds later
           glucoseLevel = 90; 
 
-          kitty.state = HAPPY; 
+          kitty.state = "happy"; 
           heart.pulseRate = 60; // bpm
           prompt.text = "Great! " + catName + " just had a delicious cat snack and her"
             + "blood glucose levels\nare good now at 90mg/dl.";             
@@ -238,18 +239,18 @@ void draw() {
   case INSULIN: 
     // Initial screen
     if (!stepSet) {
-      bgColor = APRICOT; 
+      bgColor = COL_APRICOT; 
 
       for (String elementKey : visibleSets.get("normal"))
         graphics.get(elementKey).visible = true;     
 
       glucoseLevel = 230;  // mg/dl
 
-      kitty.state = SAD; 
+      kitty.state = "sad"; 
       barChart.setLevel(glucoseLevel); 
-      barChart.playAnim(BLINK, 2.0); 
+      barChart.playAnim("blink", 2.0); 
       heart.pulseRate = 180; // bpm
-      heart.playAnim(HEARTBEAT); 
+      heart.playAnim("heartbeat"); 
       syringe.opacity = 255;
       prompt.text = catName + " has just eaten a high sugar meal.\n\n" + 
         "Administer " + catName + "'s insulin to help reduce blood glucose " + 
@@ -278,8 +279,8 @@ void draw() {
 
         // Insulin is successfully administered
         if (glucoseLevel <= 90.0F) {
-          kitty.state = HAPPY; 
-          barChart.stopAnim(BLINK); 
+          kitty.state = "happy"; 
+          barChart.stopAnim(); 
           heart.pulseRate = 55; // bpm
           syringe.visible = false; 
           prompt.text = "Awesome! " + catName + " relies on insulin to cope with glucose"
@@ -302,18 +303,18 @@ void draw() {
   case EMERGENCY : 
     // Initial screen
     if (!stepSet) {
-      bgColor = LIGHTGREEN; 
+      bgColor = COL_LIGHTGREEN; 
 
       for (String elementKey : visibleSets.get("normal"))
         graphics.get(elementKey).visible = true;     
 
       glucoseLevel = 20;  // mg/dl
 
-      kitty.state = SAD; 
+      kitty.state = "sad"; 
       barChart.setLevel(glucoseLevel); 
-      barChart.playAnim(BLINK, 8.0); 
+      barChart.playAnim("blink", 8.0); 
       heart.pulseRate = 240; // bpm
-      heart.playAnim(HEARTBEAT); 
+      heart.playAnim("heartbeat"); 
       prompt.text = "Uh oh! " + catName + "is experiencing shakiness, chills and" + 
         " light headedness\n- symptoms of hypoglycemia (very low blood glucose" +  
         " levels).\n\nPress the nurse call buttom for emergency assistance!";
@@ -336,21 +337,21 @@ void draw() {
           settings.put("lock_controls", true);
 
           nurse.visible = true; 
-          nurse.playAnim(APPEARING); 
+          nurse.playAnim("appearing"); 
           prompt.text = "Hold on, poor " + catName + "! Help is coming!";
         } //
 
         else if (timer == 258) {
           prompt.text = "It's alright, nurse is here. She will take care of our kitty."; 
-          barChart.stopAnim(BLINK);
+          barChart.stopAnim();
         } //
 
         else if (timer == 350) 
-          barChart.playAnim(GROW, glucoseLevel, 70.0, 3.0);
+          barChart.playAnim("grow", glucoseLevel, 70.0, 3.0);
 
         else if (timer == 640) {
-          kitty.state = HAPPY; 
-          barChart.stopAnim(GROW); 
+          kitty.state = "happy"; 
+          barChart.stopAnim(); 
           heart.pulseRate = 55; // bpm
           nurse.visible = false; 
           prompt.text = "Good job! " + catName + " is grateful to you for rescuing " +  
@@ -374,13 +375,13 @@ void draw() {
 
   case CONGRATULATIONS: 
     if (!stepSet) {
-      bgColor = JASMINE; 
+      bgColor = COL_JASMINE; 
 
       for (String elementKey : visibleSets.get("with_overlay"))
         graphics.get(elementKey).visible = true;     
 
-      kitty.state = HAPPY; 
-      overlay.state = CONGRATULATIONS; 
+      kitty.state = "happy"; 
+      overlay.state = "congratulations";
       pressEnter.visible = false;
       soundPlayer.play("fanfares", 0.5);
 
@@ -469,7 +470,7 @@ void keyPressed() {
     if (step == Step.ENTER_CAT_NAME) {
       String catName = (String)settings.get("cat_name");
 
-      if (Character.toString(key).matches("[A-Za-z]")) {
+      if (Character.toString(key).matches("[A-Za-z ]")) {
         if (textWidth(catName) >= 120) {
           soundPlayer.play("keystroke_error", 0.5);
           return;

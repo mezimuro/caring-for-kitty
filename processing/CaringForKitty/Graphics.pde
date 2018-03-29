@@ -3,8 +3,8 @@
  Graphics.pde
  ============================================================
  
- Collection of meaningful and animated graphic elements for 
- onscreen usage.
+ List and implementations of all graphic elements that are 
+ used onscreen.
  
  
  ============================================================
@@ -13,37 +13,21 @@
  */
 
 color bgColor;
+int fr;  // shortcut for frame rate
 
 
 // #############################################################################
 
-// KittyTheCat states
-static final int HAPPY = 0;
-static final int SAD = 1;  
-
 class GKittyTheCat extends GraphicElement {  
-  int state;
-  ArrayList<PImage> imgs = new ArrayList<PImage>();
 
-  GKittyTheCat(float x, float y, float scaleFactor, int state) {
-    super(x, y, scaleFactor);
-    this.state = state;
-    imgs.add(loadImage("images/cat_happy.png"));
-    imgs.add(loadImage("images/cat_sad.png"));
+  GKittyTheCat(float x, float y, float scaleFactor, String state) {
+    super(x, y, scaleFactor, state);
+    images.put("happy", loadImage("images/cat_happy.png"));
+    images.put("sad", loadImage("images/cat_sad.png"));
   }
 
   void drawElement() {
-    tint(255, 255);
-
-    switch (state) {
-
-    case HAPPY:
-      image(imgs.get(HAPPY), -255, -540);
-      break;
-    case SAD:
-      image(imgs.get(SAD), -255, -540);
-      break;
-    }
+    image(images.get(state), -255, -540);
   }
 }
 
@@ -69,41 +53,39 @@ class GInfoBoard extends GraphicElement {
 
 // #############################################################################
 
-// GBarChart animations
-static final int BLINK = 0;
-static final int GROW = 1;  
+class GBarChart extends GraphicElement {   
 
-class GBarChart extends GraphicElement { 
-  float barHeight = 0.0;    
-  boolean barVisible = true;  
+  float barHeight = 0.0;     
   int barGrowDirection = 1;
+  boolean barVisible = true;  
 
   GBarChart(float x, float y) {  // origin is chart origin
     super(x, y);
-    anims.add(new AnimationBlink());
-    anims.add(new AnimationGrow());
+    anims.put("blink", new AnimationBlink());
+    anims.put("grow", new AnimationGrow());
   }  
 
   void drawElement() {
+    // axes and scale
     strokeWeight(2);
     stroke(0);
     line(30, 0, 160, 0);
     line(30, 0, 30, -160);
-    for (int i = 0; i<= 4; i++) 
+    for (int i = 0; i <= 4; i++) 
       line(20, -35*i, 30, -35*i);
 
-    if (barVisible) {
+    // the red bar
+    if (barVisible) {      
+      fill(COL_STRAWBERRY);
       noStroke();
-      fill(224, 61, 72);
       rect(50, -1, 50, -barHeight-1);
     }
 
+    // markings and labels
     fill(0);
     textFont(fonts.get("primary"), 14);
     text("Glucose Level", 28, 16);
-
-    textFont(fonts.get("primary"), 12);
-    text("mg/dl", 11, -170);
+    textFont(fonts.get("primary"), 12);   
     textAlign(RIGHT);
     text("0", 12, 3);
     text("50", 12, -32);
@@ -111,14 +93,15 @@ class GBarChart extends GraphicElement {
     text("150", 12, -102);
     text("200", 12, -137);
     textAlign(LEFT);
+    text("mg/dl", 11, -170);
+  }
+
+  float mapLevel(float glucoseLevel) {
+    return map(glucoseLevel, 0, 230, 0, 158);  // maps glucose level to bar's onscreen height
   }
 
   void setLevel(float glucoseLevel) {
     barHeight = mapLevel(glucoseLevel);
-  }
-
-  float mapLevel(float glucoseLevel) {
-    return map(glucoseLevel, 0, 230, 0, 158);
   }
 
 
@@ -126,7 +109,7 @@ class GBarChart extends GraphicElement {
     void handler() {  
       float freq = (float)params[0];  // blinking frequency in Hz
 
-      if ((frameCount / ceil(60/2/freq)) % 2 == 0)
+      if ((frameCount / ceil(fr/2/freq)) % 2 == 0)
         barVisible = true;
       else
         barVisible = false;
@@ -137,26 +120,27 @@ class GBarChart extends GraphicElement {
     }
   }
 
-  class AnimationGrow extends GraphicElementAnimation {   
-    float from, to, limit;   
-    float d;  // calculated increment
-    int timer;
+  class AnimationGrow extends GraphicElementAnimation {    
+    float from, to;   
+    float d;  // computed increment
+    int frames_num;
 
     void pre() {
-      from = mapLevel((float)params[0]); 
-      to = mapLevel((float)params[1]); 
+      from = (float)params[0]; 
+      to = (float)params[1]; 
       float time = (float)params[2];
-      d = abs((from-to) / (time * 60));
-      limit = time * 60;
-      timer = 0;
 
+      d = abs(mapLevel(from-to) / (time * fr));
+      frames_num = round(time * fr);    
       barGrowDirection = (from <= to) ? 1 : -1;
+
+      timer = 0;
     }
 
     void handler() {  
-      if (timer <= limit) {
+      if (timer < frames_num) 
         barHeight += d*barGrowDirection;
-      } else
+      else
         playing = false;
 
       timer += 1;
@@ -167,23 +151,21 @@ class GBarChart extends GraphicElement {
 
 // #############################################################################
 
-// GHeart animations
-static final int HEARTBEAT = 0;
-
-class GHeart extends GraphicElement {
+class GHeart extends GraphicElement {  
   int pulseRate;
 
   GHeart(float x, float y, int pulseRate) {
     super(x, y);
     this.pulseRate = pulseRate;
-    anims.add(new AnimationHeartbeat());
+    anims.put("heartbeat", new AnimationHeartbeat());
   }
 
   void drawElement() {
     smooth();
     fill(240, 30, 50);  
     noStroke();
-      
+
+    // heart's shape
     beginShape();
     vertex(50, 15);
     bezierVertex(50, -5, 90, 5, 50, 40);
@@ -191,22 +173,21 @@ class GHeart extends GraphicElement {
     bezierVertex(50, -5, 10, 5, 50, 40);
     endShape();
 
+    // correction
     stroke(240, 30, 50);
     strokeWeight(2);
     line(50, 13, 50, 38);
   }
 
 
-  class AnimationHeartbeat extends GraphicElementAnimation {   
-    int timer;
-
+  class AnimationHeartbeat extends GraphicElementAnimation {       
     void pre() {
       timer = 0;
     }
 
     void handler() {  
-      float x = timer / 10.0;
-      scaleFactor = 1.0 + (cos(PI*x*0.333*(pulseRate/72.0)))/((20-abs(1*(pulseRate/200.0)))*1.19);
+      float x = timer * (6.0/fr);
+      scaleFactor = 1.0 + (cos(PI*x*0.333*(pulseRate/72.0)))/((20-abs(1*(pulseRate/200.0)))*1.19);  // pulsating
       scaleFactor *= 1.17;
 
       timer += 1;
@@ -224,8 +205,8 @@ class GKeysChart extends GraphicElement {
   }
 
   void drawElement() {  
-    textFont(fonts.get("debug"), 14);
     fill(30);
+    textFont(fonts.get("debug"), 14);    
     text("KEYS CHART", -5, 1);
 
     for (int i = 0; i <= 5; i++) {
@@ -267,51 +248,42 @@ class GKeysChart extends GraphicElement {
 
 // #############################################################################
 
-// GOverlay states
-static final int WELCOME = 0;
-static final int ENTER_CAT_NAME = 1;  
-static final int CONGRATULATIONS = 2;  
-
-
 class GOverlay extends GraphicElement {
-  int state;
 
   GOverlay() {
-    super(0, 0);
-    this.state = WELCOME;
+    super(0, 0, 1.0, "welcome");
   }
 
   void drawElement() {  
     String catName = ((String)settings.get("cat_name"));
 
     noStroke();
-    if (state != CONGRATULATIONS)
+    if (state != "congratulations")
       fill(255, 241);
     else
-      fill(JASMINE, 245);
+      fill(COL_JASMINE, 245);
 
     rect(0, 0, width, height);
     fill(0, 94);
     rect(width/2 - 300, 150, 600, 80, 5); 
-    textAlign(CENTER);
 
     fill(0, 94);
     rect(width/2 - 300, 235, 600, 350, 5);
+    textAlign(CENTER);
 
     switch (state) {
-    case WELCOME:
+    case "welcome":
       fill(255);
       textFont(fonts.get("primary"), 40);
       text("WELCOME", width/2, 203);
 
       fill(255);
-      textFont(fonts.get("primary"), 18); 
+      textFont(fonts.get("primary"), 18);      
       text("[Text that introduces type one diabetes\nand the basics of the game]", width/2, 269);
 
       break;
 
-
-    case ENTER_CAT_NAME:
+    case "enter_cat_name":
       fill(255);
       textFont(fonts.get("primary"), 40);
       text("ENTER CAT'S NAME", width/2, 200);
@@ -328,11 +300,10 @@ class GOverlay extends GraphicElement {
         fill(0, 0); 
       rect(width/2 + textWidth(catName) - textWidth(catName)*0.5, 411.2, 30, -6); 
 
-      popMatrix(); 
+      popMatrix();     
       break; 
 
-
-    case CONGRATULATIONS : 
+    case "congratulations": 
       fill(255); 
       textFont(fonts.get("primary"), 30); 
       text("* CERTIFICATE OF COMPLETION *", width/2, 200); 
@@ -354,6 +325,7 @@ class GOverlay extends GraphicElement {
 // #############################################################################
 
 class GText extends GraphicElement {
+
   String text; 
   PFont font; 
   int fontSize; 
@@ -412,6 +384,7 @@ class GPressEnter extends GraphicElement {
 // #############################################################################
 
 class GSyringe extends GraphicElement {
+  
   float opacity; 
   int fadeDirection; 
   PImage img; 
@@ -439,16 +412,16 @@ class GSyringe extends GraphicElement {
     fill(0, opacity); 
     textFont(fonts.get("primary"), 40); 
     text("Injecting insulin...", 72, 216);
+
+    tint(255, 255);
   }
 }
 
 
 // #############################################################################
 
-// GNurse animations
-static final int APPEARING = 0; 
-
 class GNurse extends GraphicElement {
+  
   float opacity; 
   PImage img; 
   float defaultX; 
@@ -459,12 +432,13 @@ class GNurse extends GraphicElement {
     this.img = loadImage("images/nurse.png"); 
     this.scaleFactor = 0.8; 
     this.defaultX = pos.x; 
-    anims.add(new AnimationAppearing());
+    anims.put("appearing", new AnimationAppearing());
   }
 
   void drawElement() {
     tint(255, opacity); 
     image(img, 0, 0);
+    tint(255, 255);
   }
 
   class AnimationAppearing extends GraphicElementAnimation {   
@@ -498,6 +472,7 @@ class GNurse extends GraphicElement {
 // #############################################################################
 
 class GCatFood extends GraphicElement {
+  
   float opacity; 
   PImage img; 
 
@@ -512,10 +487,11 @@ class GCatFood extends GraphicElement {
     tint(255, opacity); 
     image(img, 0, 0); 
 
-    if (opacity < 255.0) {
+    if (opacity < 255.0) 
       if (frameCount % 2 == 0)
         opacity += 4.6;
-    }
+
+    tint(255, 255);
   }
 }
 
