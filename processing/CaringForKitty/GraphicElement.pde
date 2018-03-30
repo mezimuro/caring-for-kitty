@@ -26,6 +26,9 @@ abstract class GraphicElement {
   // Visibility switch to make element hidden if needed
   boolean visible = true;
 
+  // Allows element to be (semi)transparent
+  float opacity; 
+
   // Stores raster images that can be used by element
   Map<String, PImage> images = new HashMap();  
 
@@ -34,6 +37,7 @@ abstract class GraphicElement {
 
   GraphicElement(float x, float y) {
     this.pos = new PVector(x, y);
+    this.opacity = 255;
   }     
 
   // Another constructor variant 
@@ -104,7 +108,7 @@ abstract class GraphicElementAnimation {
 
   // Stores animation's parameters
   Object[] params;
-  
+
   // Built-in timer
   long timer;
 

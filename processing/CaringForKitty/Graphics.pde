@@ -13,7 +13,7 @@
  */
 
 color bgColor;
-int fr;  // shortcut for frame rate
+int fr;  // shortcut for accessing current frame rate
 
 
 // #############################################################################
@@ -54,7 +54,6 @@ class GInfoBoard extends GraphicElement {
 // #############################################################################
 
 class GBarChart extends GraphicElement {   
-
   float barHeight = 0.0;     
   int barGrowDirection = 1;
   boolean barVisible = true;  
@@ -97,7 +96,7 @@ class GBarChart extends GraphicElement {
   }
 
   float mapLevel(float glucoseLevel) {
-    return map(glucoseLevel, 0, 230, 0, 158);  // maps glucose level to bar's onscreen height
+    return map(glucoseLevel, 0, 230, 0, 158);  // maps glucose value to bar's onscreen height
   }
 
   void setLevel(float glucoseLevel) {
@@ -151,6 +150,9 @@ class GBarChart extends GraphicElement {
 
 // #############################################################################
 
+// Credits to Luciana from:
+// https://www.processing.org/discourse/beta/num_1246205739.html
+
 class GHeart extends GraphicElement {  
   int pulseRate;
 
@@ -162,7 +164,7 @@ class GHeart extends GraphicElement {
 
   void drawElement() {
     smooth();
-    fill(240, 30, 50);  
+    fill(COL_IMPERIALRED);  
     noStroke();
 
     // heart's shape
@@ -174,7 +176,7 @@ class GHeart extends GraphicElement {
     endShape();
 
     // correction
-    stroke(240, 30, 50);
+    stroke(COL_IMPERIALRED);
     strokeWeight(2);
     line(50, 13, 50, 38);
   }
@@ -221,7 +223,7 @@ class GKeysChart extends GraphicElement {
     }
 
     pushMatrix();
-    translate(-30, 0);
+    translate(-30, 0);  // adjustable horizontal alignment
 
     noFill();
     stroke(120);
@@ -257,44 +259,44 @@ class GOverlay extends GraphicElement {
   void drawElement() {  
     String catName = ((String)settings.get("cat_name"));
 
-    noStroke();
+    noStroke(); 
+    textAlign(CENTER);
+
+    // background
     if (state != "congratulations")
       fill(255, 241);
     else
       fill(COL_JASMINE, 245);
+    rect(0, 0, width, height);    
 
-    rect(0, 0, width, height);
+    // content
     fill(0, 94);
     rect(width/2 - 300, 150, 600, 80, 5); 
-
-    fill(0, 94);
     rect(width/2 - 300, 235, 600, 350, 5);
-    textAlign(CENTER);
 
+    // text
+    fill(255);
     switch (state) {
     case "welcome":
-      fill(255);
       textFont(fonts.get("primary"), 40);
       text("WELCOME", width/2, 203);
 
-      fill(255);
       textFont(fonts.get("primary"), 18);      
       text("[Text that introduces type one diabetes\nand the basics of the game]", width/2, 269);
 
       break;
 
     case "enter_cat_name":
-      fill(255);
       textFont(fonts.get("primary"), 40);
       text("ENTER CAT'S NAME", width/2, 200);
 
       pushMatrix();
-      translate(0, -69);
+      translate(0, -69); // adjustable horizontal alignment
 
       textFont(fonts.get("primary"), 35);
       text(catName + " ", width/2, 410.5);
 
-      if (((frameCount/15) % 2) == 0)
+      if ((frameCount/round(fr/4)) % 2 == 0)
         fill(255); 
       else
         fill(0, 0); 
@@ -304,7 +306,6 @@ class GOverlay extends GraphicElement {
       break; 
 
     case "congratulations": 
-      fill(255); 
       textFont(fonts.get("primary"), 30); 
       text("* CERTIFICATE OF COMPLETION *", width/2, 200); 
 
@@ -312,7 +313,7 @@ class GOverlay extends GraphicElement {
       text("Game Passed!", width/2, 340); 
 
       textFont(fonts.get("primary"), 18); 
-      text(catName + " is happy and healthy and you are\nwell informed on type one diabetes!", width/2, 394); 
+      text(catName + " is happy and healthy and you are\nwell informed now on type one diabetes!", width/2, 394); 
 
       break;
     }
@@ -325,7 +326,6 @@ class GOverlay extends GraphicElement {
 // #############################################################################
 
 class GText extends GraphicElement {
-
   String text; 
   PFont font; 
   int fontSize; 
@@ -368,7 +368,7 @@ class GPressEnter extends GraphicElement {
   } 
 
   void drawElement() {
-    if (((frameCount/45) % 2) == 0)
+    if ((frameCount/round(fr*0.75)) % 2 == 0)
       fill(0); 
     else
       fill(0, 0); 
@@ -384,31 +384,26 @@ class GPressEnter extends GraphicElement {
 // #############################################################################
 
 class GSyringe extends GraphicElement {
-  
-  float opacity; 
   int fadeDirection; 
-  PImage img; 
-
+  int t;
   GSyringe(float x, float y) {
-    super(x, y); 
-    this.opacity = 255; 
-    this.img = loadImage("images/syringe.png"); 
-    this.scaleFactor = 0.4; 
+    super(x, y, 0.4); 
+    this.images.put("main", loadImage("images/syringe.png")); 
     this.fadeDirection = 1;
   } 
 
   void drawElement() {
     tint(255, opacity); 
-    image(img, 0, 0); 
+    image(images.get("main"), 0, 0); 
 
-    if (frameCount % 2 == 0)
-      opacity += 1*fadeDirection*14; 
-
+    // animated (fade in/out) syringe image
+    opacity += 1*fadeDirection*7*(60.0/fr); 
     if (opacity >= 255)
       fadeDirection = -1; 
     else if (opacity <= 0)
       fadeDirection = 1; 
 
+    // image subtitle
     fill(0, opacity); 
     textFont(fonts.get("primary"), 40); 
     text("Injecting insulin...", 72, 216);
@@ -421,8 +416,6 @@ class GSyringe extends GraphicElement {
 // #############################################################################
 
 class GNurse extends GraphicElement {
-  
-  float opacity; 
   PImage img; 
   float defaultX; 
 
@@ -472,7 +465,7 @@ class GNurse extends GraphicElement {
 // #############################################################################
 
 class GCatFood extends GraphicElement {
-  
+
   float opacity; 
   PImage img; 
 

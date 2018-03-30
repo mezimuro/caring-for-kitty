@@ -34,6 +34,7 @@ static final color COL_LIGHTGREEN = #A7F1C7;
 static final color COL_APRICOT = #FBCEB1;
 static final color COL_JASMINE = #F8DE7E;
 static final color COL_STRAWBERRY = #D14152;
+static final color COL_IMPERIALRED = #ED2939;
 
 
 // #############################################################################
@@ -167,6 +168,7 @@ void draw() {
 
   case FEEDING: 
     // Initial screen
+    
     if (!stepSet) {
       bgColor = COL_SKYBLUE;
 
@@ -217,7 +219,7 @@ void draw() {
           kitty.state = "happy"; 
           heart.pulseRate = 60; // bpm
           prompt.text = "Great! " + catName + " just had a delicious cat snack and her"
-            + "blood glucose levels\nare good now at 90mg/dl.";             
+            + " blood glucose levels\nare good now at 90mg/dl.";             
           pressEnter.pos.y = 498; 
           pressEnter.visible = true; 
           soundPlayer.play("purring", 0.5);  
@@ -315,7 +317,7 @@ void draw() {
       barChart.playAnim("blink", 8.0); 
       heart.pulseRate = 240; // bpm
       heart.playAnim("heartbeat"); 
-      prompt.text = "Uh oh! " + catName + "is experiencing shakiness, chills and" + 
+      prompt.text = "Uh oh! " + catName + " is experiencing shakiness, chills and" + 
         " light headedness\n- symptoms of hypoglycemia (very low blood glucose" +  
         " levels).\n\nPress the nurse call buttom for emergency assistance!";
       soundPlayer.play("meow_loud", 0.4);
@@ -435,7 +437,7 @@ void keyPressed() {
       step = Step.CONGRATULATIONS; 
       stepSet = false; 
       break; 
-
+  
     case 'e': 
     case 'E':
       // When sensors are unavailable, this allows testing stuff by pressing "E"

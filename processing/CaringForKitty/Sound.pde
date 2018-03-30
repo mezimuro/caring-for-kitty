@@ -33,7 +33,7 @@ static final String[] soundNames = {
 
 class SoundPlayer {
 
-  Map<String, SoundFile> sounds = new HashMap<String, SoundFile>();
+  Map<String, SoundFile> sounds = new HashMap();
 
   SoundPlayer() {
     for (String soundName : soundNames)
@@ -45,7 +45,8 @@ class SoundPlayer {
       return;
 
     for (SoundFile sound : sounds.values())  
-      sound.stop();
+      if (sound.isPlaying() != 0)
+        sound.stop();
 
     soundPlayer.sounds.get(soundName).play();
     soundPlayer.sounds.get(soundName).amp(volume);
