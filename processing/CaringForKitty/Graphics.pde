@@ -13,7 +13,14 @@
  */
 
 color bgColor;
-int fr;  // shortcut for accessing current frame rate
+int fr;  // shortcut to get the set framerate
+float fraf; // framerate adjust factor
+
+
+// Returns a framerate-adjusted time interval
+int secsToFrames(float seconds) {
+  return round(seconds * fr);
+}
 
 
 // #############################################################################
@@ -22,8 +29,8 @@ class GKittyTheCat extends GraphicElement {
 
   GKittyTheCat(float x, float y, float scaleFactor, String state) {
     super(x, y, scaleFactor, state);
-    images.put("happy", loadImage("images/cat_happy.png"));
-    images.put("sad", loadImage("images/cat_sad.png"));
+    this.images.put("happy", loadImage("images/cat_happy.png"));
+    this.images.put("sad", loadImage("images/cat_sad.png"));
   }
 
   void drawElement() {
@@ -60,8 +67,8 @@ class GBarChart extends GraphicElement {
 
   GBarChart(float x, float y) {  // origin is chart origin
     super(x, y);
-    anims.put("blink", new AnimationBlink());
-    anims.put("grow", new AnimationGrow());
+    this.anims.put("blink", new AnimationBlink());
+    this.anims.put("grow", new AnimationGrow());
   }  
 
   void drawElement() {
@@ -108,7 +115,7 @@ class GBarChart extends GraphicElement {
     void handler() {  
       float freq = (float)params[0];  // blinking frequency in Hz
 
-      if ((frameCount / ceil(fr/2/freq)) % 2 == 0)
+      if ((frameCount / ceil(fr/2.0F/freq)) % 2 == 0)
         barVisible = true;
       else
         barVisible = false;
@@ -159,7 +166,7 @@ class GHeart extends GraphicElement {
   GHeart(float x, float y, int pulseRate) {
     super(x, y);
     this.pulseRate = pulseRate;
-    anims.put("heartbeat", new AnimationHeartbeat());
+    this.anims.put("heartbeat", new AnimationHeartbeat());
   }
 
   void drawElement() {
@@ -385,7 +392,7 @@ class GPressEnter extends GraphicElement {
 
 class GSyringe extends GraphicElement {
   int fadeDirection; 
-  int t;
+
   GSyringe(float x, float y) {
     super(x, y, 0.4); 
     this.images.put("main", loadImage("images/syringe.png")); 
@@ -393,11 +400,10 @@ class GSyringe extends GraphicElement {
   } 
 
   void drawElement() {
-    tint(255, opacity); 
     image(images.get("main"), 0, 0); 
 
     // animated (fade in/out) syringe image
-    opacity += 1*fadeDirection*7*(60.0/fr); 
+    opacity += 1*fadeDirection*7*fraf; 
     if (opacity >= 255)
       fadeDirection = -1; 
     else if (opacity <= 0)
@@ -407,8 +413,6 @@ class GSyringe extends GraphicElement {
     fill(0, opacity); 
     textFont(fonts.get("primary"), 40); 
     text("Injecting insulin...", 72, 216);
-
-    tint(255, 255);
   }
 }
 
@@ -420,22 +424,18 @@ class GNurse extends GraphicElement {
   float defaultX; 
 
   GNurse(float x, float y) {
-    super(x, y); 
-    this.opacity = 0; 
-    this.img = loadImage("images/nurse.png"); 
-    this.scaleFactor = 0.8; 
-    this.defaultX = pos.x; 
-    anims.put("appearing", new AnimationAppearing());
+    super(x, y, 0.8); 
+    this.images.put("main", loadImage("images/nurse.png"));   
+    this.anims.put("come_in", new AnimationComeIn());
+    this.defaultX = pos.x;
   }
 
   void drawElement() {
-    tint(255, opacity); 
-    image(img, 0, 0);
-    tint(255, 255);
+    image(images.get("main"), 0, 0);
   }
 
-  class AnimationAppearing extends GraphicElementAnimation {   
-    int timer; 
+
+  class AnimationComeIn extends GraphicElementAnimation {    
     float targetX; 
 
     void pre() {
@@ -444,19 +444,20 @@ class GNurse extends GraphicElement {
     }
 
     void handler() {  
-      float x = timer / 150.0; 
+      float x =(timer/150.0) * fraf; 
 
       if (timer == 0)
         targetX = defaultX; 
 
-      pos.x = targetX - (exp(10/(x+0.8))); 
-      opacity += 1.2; 
-      timer += 1; 
+      pos.x = targetX - exp(10/(x+0.8)); 
+      opacity += 1.2 * fraf; 
 
       if (abs(pos.x - targetX) < 60) {
         pos.x = targetX - 61; 
         playing = false;
       }
+
+      timer += 1;
     }
   }
 }
@@ -466,25 +467,27 @@ class GNurse extends GraphicElement {
 
 class GCatFood extends GraphicElement {
 
-  float opacity; 
-  PImage img; 
-
   GCatFood(float x, float y) {
-    super(x, y); 
-    this.opacity = 0; 
-    this.img = loadImage("images/food.png"); 
-    this.scaleFactor = 0.15;
+    super(x, y, 0.15); 
+    this.images.put("main", loadImage("images/food.png"));
+    this.anims.put("fade_in", new AnimationFadeIn());
   }
 
   void drawElement() {
-    tint(255, opacity); 
-    image(img, 0, 0); 
+    image(images.get("main"), 0, 0);
+  }
 
-    if (opacity < 255.0) 
-      if (frameCount % 2 == 0)
-        opacity += 4.6;
 
-    tint(255, 255);
+  class AnimationFadeIn extends GraphicElementAnimation {   
+    void pre() {
+      timer = 0; 
+      opacity = 0;
+    }
+
+    void handler() {  
+      if (opacity < 255.0) 
+        opacity += 2.9 * fraf;
+    }
   }
 }
 
@@ -492,7 +495,7 @@ class GCatFood extends GraphicElement {
 // #############################################################################
 
 class GDebug extends GraphicElement {
-
+  
   GDebug() {
     super(0, 0);
   }
@@ -500,12 +503,10 @@ class GDebug extends GraphicElement {
   void drawElement() {
     fill(30);
     textFont(fonts.get("debug"), 12);
-
-    text("FPS: " + round(frameRate), 5, 15);
-    text("mouseX: " + (mouseX) + ", mouseY: " + (mouseY), 5, 35);
-    text("sensors: slider=" + sensors.slider + ", proximity=" + sensors.proximity + ", force=" + sensors.force, 5, 55);
+    textLeading(15);
+    
+    text("FPS: " + round(frameRate) + "\nmouseX: " + (mouseX) + ", mouseY: " +
+    (mouseY) +  "\n\nslider: " + sensors.slider + "\nproximity: " + 
+    sensors.proximity + "\nforce: " + sensors.force , 5, 15);
   }
 }
-
-
-// #############################################################################

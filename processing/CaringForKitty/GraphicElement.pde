@@ -89,10 +89,12 @@ abstract class GraphicElement {
     pushMatrix();
     translate(pos.x, pos.y);
     scale(scaleFactor);
+    tint(255, opacity); 
 
     drawElement();
     processAnimations();
 
+    //tint(255, 255);  // comment this line out as post-optimization
     popMatrix();
   }
 

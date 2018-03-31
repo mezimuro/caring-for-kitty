@@ -71,8 +71,9 @@ void setup() {
   settings.put("cat_name", "Kitty The Cat");  // Default
 
   fr = (int)settings.get("framerate");
+  fraf = 60.0F/fr;
   frameRate(fr);
-  
+
   fonts = new HashMap();    
   fonts.put("primary", loadFont("fonts/Skia-Regular_Black-26.vlw"));
   fonts.put("debug", loadFont("fonts/LucidaSans-12.vlw"));
@@ -88,7 +89,7 @@ void setup() {
   graphics.put("nurse", new GNurse(506, 475));
   graphics.put("prompt", new GText(120, 417, fonts.get("primary"), 18, color(0)));
   graphics.put("overlay", new GOverlay());  
-  graphics.put("pressenter", new GPressEnter());  
+  graphics.put("press_enter", new GPressEnter());  
   graphics.put("keyschart", new GKeysChart(27, 796)); 
   graphics.put("debug", new GDebug()); 
 
@@ -98,7 +99,7 @@ void setup() {
     "kitty", "infoboard", "barchart", "heart", "prompt", "keyschart"
     });
   visibleSets.put("with_overlay", new String[]{
-    "kitty", "infoboard", "overlay", "pressenter", "keyschart"
+    "kitty", "infoboard", "overlay", "press_enter", "keyschart"
     });
 
   soundPlayer = new SoundPlayer();
@@ -108,7 +109,7 @@ void setup() {
   state = State.IDLE;
 }
 
-void draw() {    
+void draw() {        
   sensors.read();
 
   // Hiding everything, then bringing back what is needed
@@ -127,7 +128,7 @@ void draw() {
   GNurse nurse = ((GNurse)graphics.get("nurse"));
   GText prompt = ((GText)graphics.get("prompt"));
   GOverlay overlay = ((GOverlay)graphics.get("overlay"));
-  GPressEnter pressEnter = ((GPressEnter)graphics.get("pressenter"));  
+  GPressEnter pressEnter = ((GPressEnter)graphics.get("press_enter"));  
 
   switch (step) { 
   case START_SCREEN:  
@@ -168,7 +169,7 @@ void draw() {
 
   case FEEDING: 
     // Initial screen
-    
+
     if (!stepSet) {
       bgColor = COL_SKYBLUE;
 
@@ -185,7 +186,7 @@ void draw() {
       prompt.text = "It has been 3 hours since " + catName +  " last ate and her" + 
         " blood sugar levels have\ndropped down to 70mg/dl.\n\nFeed " + catName + 
         " a healthy snack to raise her blood glucose levels."; 
-      soundPlayer.play("meow_short", 0.15);
+      soundPlayer.play("meow_short", 0.25);
 
       sensors.reset();
 
@@ -203,8 +204,8 @@ void draw() {
       // Feeding process
       if (state == State.ACTION_EXECUTING) {
         if (timer == 0) {
-          snack.opacity = 0;
-          snack.visible = true;            
+          snack.visible = true;   
+          snack.playAnim("fade_in");
           barChart.stopAnim(); 
           barChart.playAnim("grow", 70.0, 90.0, 4.0); 
           prompt.text = "Looks like there is some food!\nEating..."; 
@@ -213,7 +214,7 @@ void draw() {
         }
 
         // Cat is successfully fed
-        if (timer == 4*fr) { // 4 seconds later
+        if (timer == secsToFrames(4.0)) { 
           glucoseLevel = 90; 
 
           kitty.state = "happy"; 
@@ -260,7 +261,6 @@ void draw() {
       soundPlayer.play("meow_angry", 0.4);
 
       state = State.IDLE; 
-      timer = 0;
 
       stepSet = true;
     }
@@ -274,9 +274,8 @@ void draw() {
 
       // Insulin flowing process
       if (state == State.ACTION_EXECUTING) {
-        float d = abs(sensors_enabled ? sensors.sliderDelta : 10) * 0.05;  // set flow speeds here
-        glucoseLevel -= abs(d); 
-
+        float d = abs(sensors_enabled ? sensors.sliderDelta : 10) * 0.05 * fraf;  // set flow speeds here     
+        glucoseLevel -= abs(d);        
         barChart.setLevel(glucoseLevel);
 
         // Insulin is successfully administered
@@ -293,8 +292,6 @@ void draw() {
 
           state = State.ACTION_DONE;
         }
-
-        timer += 1;
       }
     }
 
@@ -320,7 +317,7 @@ void draw() {
       prompt.text = "Uh oh! " + catName + " is experiencing shakiness, chills and" + 
         " light headedness\n- symptoms of hypoglycemia (very low blood glucose" +  
         " levels).\n\nPress the nurse call buttom for emergency assistance!";
-      soundPlayer.play("meow_loud", 0.4);
+      soundPlayer.play("meow_loud", 0.5);
 
       state = State.IDLE; 
       timer = 0;
@@ -339,19 +336,19 @@ void draw() {
           settings.put("lock_controls", true);
 
           nurse.visible = true; 
-          nurse.playAnim("appearing"); 
+          nurse.playAnim("come_in"); 
           prompt.text = "Hold on, poor " + catName + "! Help is coming!";
         } //
 
-        else if (timer == 258) {
+        else if (timer == secsToFrames(4.3)) {
           prompt.text = "It's alright, nurse is here. She will take care of our kitty."; 
           barChart.stopAnim();
         } //
 
-        else if (timer == 350) 
+        else if (timer == secsToFrames(7.0)) 
           barChart.playAnim("grow", glucoseLevel, 70.0, 3.0);
 
-        else if (timer == 640) {
+        else if (timer == secsToFrames(12.5)) {
           kitty.state = "happy"; 
           barChart.stopAnim(); 
           heart.pulseRate = 55; // bpm
@@ -437,7 +434,7 @@ void keyPressed() {
       step = Step.CONGRATULATIONS; 
       stepSet = false; 
       break; 
-  
+
     case 'e': 
     case 'E':
       // When sensors are unavailable, this allows testing stuff by pressing "E"
@@ -461,7 +458,7 @@ void keyPressed() {
       break;
 
     case ENTER: 
-      if (graphics.get("pressenter").visible) {
+      if (graphics.get("press_enter").visible) {
         step = Step.values()[(step.ordinal() + 1) % 6];
         stepSet = false;
       }
