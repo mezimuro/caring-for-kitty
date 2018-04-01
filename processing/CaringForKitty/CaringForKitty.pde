@@ -187,6 +187,7 @@ void draw() {
       prompt.text = "It has been 3 hours since " + catName +  " last ate and her" + 
         " blood sugar levels have\ndropped down to 70mg/dl.\n\nFeed " + catName + 
         " a healthy snack to raise her blood glucose levels."; 
+      soundPlayer.stopAll();
       soundPlayer.play("meow_short", 0.25);
 
       sensors.reset();
@@ -258,7 +259,8 @@ void draw() {
       syringe.opacity = 255;
       prompt.text = catName + " has just eaten a high sugar meal.\n\n" + 
         "Administer " + catName + "'s insulin to help reduce blood glucose " + 
-        "levels using\nthe slider.";        
+        "levels using\nthe slider.";     
+      soundPlayer.stopAll();
       soundPlayer.play("meow_angry", 0.4);
 
       state = State.IDLE; 
@@ -319,6 +321,7 @@ void draw() {
       prompt.text = "Uh oh! " + catName + " is experiencing shakiness, chills and" + 
         " light headedness\n- symptoms of hypoglycemia (very low blood glucose" +  
         " levels).\n\nPress the nurse call buttom for emergency assistance!";
+      soundPlayer.stopAll();
       soundPlayer.play("meow_loud", 0.5);
 
       state = State.IDLE; 
@@ -384,6 +387,7 @@ void draw() {
       kitty.state = "happy"; 
       overlay.state = "congratulations";
       pressEnter.visible = false;
+      soundPlayer.stopAll();
       soundPlayer.play("fanfares", 0.5);
 
       stepSet = true;

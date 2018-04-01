@@ -3,7 +3,7 @@
  Sound.pde
  ============================================================
  
- Simple monophonic sound player. 
+ Simple polyphonic sound player. 
  
  Table soundNames lists names of .mp3 files that should be 
  loaded.
@@ -44,11 +44,13 @@ class SoundPlayer {
     if ((boolean)settings.get("sound_enabled") == false)
       return;
 
+    soundPlayer.sounds.get(soundName).play();
+    soundPlayer.sounds.get(soundName).amp(volume);
+  }
+
+  void stopAll() {
     for (SoundFile sound : sounds.values())  
       if (sound.isPlaying() != 0)
         sound.stop();
-
-    soundPlayer.sounds.get(soundName).play();
-    soundPlayer.sounds.get(soundName).amp(volume);
   }
 }
