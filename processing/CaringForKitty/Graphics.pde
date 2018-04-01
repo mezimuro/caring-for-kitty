@@ -90,7 +90,7 @@ class GBarChart extends GraphicElement {
     // markings and labels
     fill(0);
     textFont(fonts.get("primary"), 14);
-    text("Glucose Level", 28, 16);
+    text("Glucose Level", 27, 16);
     textFont(fonts.get("primary"), 12);   
     textAlign(RIGHT);
     text("0", 12, 3);
@@ -506,7 +506,7 @@ class GDebug extends GraphicElement {
     textLeading(15);
     
     text("FPS: " + round(frameRate) + "\nmouseX: " + (mouseX) + ", mouseY: " +
-    (mouseY) +  "\n\nslider: " + sensors.slider + "\nproximity: " + 
-    sensors.proximity + "\nforce: " + sensors.force , 5, 15);
+    (mouseY) + "\n\nport: " + sensors.portName + "\nslider: " + sensors.slider 
+    + "\nproximity: " + sensors.proximity + "\nforce: " + sensors.force , 5, 15);
   }
 }

@@ -65,8 +65,8 @@ void setup() {
   settings = new HashMap();     
   settings.put("framerate", 60);  // fps
   settings.put("sound_enabled", true);
-  settings.put("sensors_enabled", false);
-  settings.put("show_debug", false);  
+  settings.put("sensors_enabled", true);
+  settings.put("show_debug", true);  
   settings.put("lock_controls", false);  
   settings.put("cat_name", "Kitty The Cat");  // Default
 
@@ -151,7 +151,7 @@ void draw() {
 
   case ENTER_CAT_NAME: 
     if (!stepSet) {
-      // bgColor = BgColor.WHITE.ordinal();
+      bgColor = COL_WHITE;
 
       for (String elementKey : visibleSets.get("with_overlay"))
         graphics.get(elementKey).visible = true;     
@@ -169,7 +169,6 @@ void draw() {
 
   case FEEDING: 
     // Initial screen
-
     if (!stepSet) {
       bgColor = COL_SKYBLUE;
 
@@ -196,7 +195,7 @@ void draw() {
       stepSet = true;
     }
 
-    // Run code only if feeding sequence is not completed by user yet
+    // If feeding sequence is not completed by user yet
     if (state != State.ACTION_DONE) {
       if (sensors_enabled && state == State.IDLE && sensors.proximityEvent)
         state = State.ACTION_EXECUTING; 
@@ -265,16 +264,17 @@ void draw() {
       stepSet = true;
     }
 
-    // Run code only if insulin sequence is not completed by user yet
+    // If insulin sequence is not completed by user yet
     if (state != State.ACTION_DONE) {     
-      if (sensors_enabled) 
-        state = (sensors.sliderDelta > 0.0F) ? State.ACTION_EXECUTING : State.IDLE;
+      state = (sensors_enabled && sensors.sliderDelta > 0.0F) | (state == State.ACTION_EXECUTING)
+        ? State.ACTION_EXECUTING : State.IDLE;
 
       syringe.visible = (state == State.ACTION_EXECUTING) | (sensors.sliderDeltaNormalized > 0.0078F);
 
       // Insulin flowing process
       if (state == State.ACTION_EXECUTING) {
-        float d = abs(sensors_enabled ? sensors.sliderDelta : 10) * 0.05 * fraf;  // set flow speeds here     
+        float d = abs((sensors_enabled && sensors.sliderDelta > 0.0F) ? sensors.sliderDelta 
+          : 10) * 0.05 * fraf;  // set flow speeds here     
         glucoseLevel -= abs(d);        
         barChart.setLevel(glucoseLevel);
 
@@ -444,7 +444,6 @@ void keyPressed() {
         case INSULIN: 
         case EMERGENCY: 
           state = State.ACTION_EXECUTING;
-          timer = 0;
           break;
         default:
           break;
