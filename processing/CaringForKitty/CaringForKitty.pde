@@ -5,6 +5,8 @@
  
  Main Processing applet code.
  
+ Version: Milestone 3 alpha
+ 
  
  ============================================================
  Part of: IAT 267 Final Project  
