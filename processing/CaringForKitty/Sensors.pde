@@ -173,9 +173,9 @@ class Sensors {
       }
 
       // if this deviation is persistent enough...
-      if ((ticks - ticksShift) >= 30) 
+      if (ticks - ticksShift >= 30) 
         // ...and it really looks like there were no objects but now there are
-        if ((proximityNormalizedShift > 100.0) && (proximityNormalized < 35.0F))
+        if (proximityNormalizedShift > 100.0 && proximityNormalized < 35.0F)
           proximityEvent = true;  // ...fire the proximity event!
 
       // #############################################################################
@@ -184,6 +184,7 @@ class Sensors {
     }
   }
 
+  // Clears any derived DSP data
   void reset() {
     proximityEvent = false;
   }
