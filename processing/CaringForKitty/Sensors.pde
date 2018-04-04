@@ -68,23 +68,30 @@ class Sensors {
     this.buffer = new byte[255];
   }
 
-  // Tries to automatically find the proper serial port
+  // Automatically finds the arduino port
   String findAvailablePort() {
-    int i, n = Serial.list().length;
+    int n = Serial.list().length;
+    int i;
+    boolean success = false;
 
     if (n == 0) 
       return null;  // exit if no ports available
 
-    for (i = 0; i < n; i++)  
+    for (i = n-1; i >= 0; i--)  
     try {
+      // try to open ports, beginning from the last one
       Serial testPort = new Serial(applet, Serial.list()[i]);
       testPort.stop();
+      success = true;
+      break;  // if found a working one, stop the search
     }
     catch (Exception e) {
     }
 
-    // returns last port from the list of available ones
-    return Serial.list()[i-1];
+    if (!success)
+      return null;
+
+    return Serial.list()[i];
   }
 
   void read() {
@@ -135,29 +142,28 @@ class Sensors {
       // ## Signal processing ########################################################
 
       if (!init) {
-        if (proximity == 0)
-          return;  // exit if there is no data coming in yet
+        /*if (proximity == 0)
+         return;  // exit as there is data coming in yet*/
 
-        this.init = true;
-      }
+        // If this cycle is the first
+        if (ticks == 0) 
+          sliderPast = slider;
 
-      // If this cycle is the first
-      if (ticks == 0) {
-        proximityNormalized = proximity;  // "normalized" means "average over time"
-        sliderPast = slider;         
-        return;  // exit as there is nothing else to do in the first cycle
+        // If this cycle is the second
+        if (ticks == 1) {
+          proximityNormalized = proximity;  // "normalized" means "average over time"
+          sliderDelta = slider - sliderPast;  // for measuring slider values difference
+
+          this.init = true;
+        }
+
+        ticks += 1;
       }
 
       proximityNormalized = ((ticks-1)*proximityNormalized + proximity) / ticks;
       sliderDelta = slider - sliderPast; 
-
-      // If this cycle is the second
-      if (ticks == 1) {
-        sliderDeltaNormalized = sliderDelta; 
-        return;  // exit as there is nothing else to do in the second cycle
-      }
-
       sliderDeltaNormalized = ((ticks-1)*sliderDeltaNormalized + sliderDelta) / ticks;
+      sliderPast = slider;
 
       if (sliderDelta == 0)
         sliderDeltaNormalized *= 0.95;  // damping when base value is zero (for smooth syringe animation)
@@ -169,7 +175,7 @@ class Sensors {
       if (abs(proximity - proximityNormalized) > 30.0F) {      
         proximityNormalizedShift = proximityNormalized;  // memorize average at the moment of the shift
         proximityNormalized = proximity;  // reset average
-        ticksShift = ticks;  // memorize the moment of shift       
+        ticksShift = ticks;  // memorize the moment of shift
       }
 
       // if this deviation is persistent enough...

@@ -479,6 +479,13 @@ void keyPressed() {
           soundPlayer.play("keystroke_error", 0.5);
           return;
         }        
+
+        // Prevents multi-spaces
+        if (key == ' ' && catName.charAt(catName.length()-1) == ' ') {
+          soundPlayer.play("keystroke_error", 0.5);
+          return;
+        }
+
         settings.put("cat_name", catName + key);   
         soundPlayer.play("keystroke", 0.5);
       } //

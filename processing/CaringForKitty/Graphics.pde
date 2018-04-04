@@ -288,8 +288,11 @@ class GOverlay extends GraphicElement {
       textFont(fonts.get("primary"), 40);
       text("WELCOME", width/2, 203);
 
-      textFont(fonts.get("primary"), 18);      
-      text("[Text that introduces type one diabetes\nand the basics of the game]", width/2, 269);
+      textFont(fonts.get("primary"), 18);  
+      textLeading(30);
+      text("Caring for Kitty is an interactive program that allows\nthe user to" +
+      " assist an animated character with\ntype 1 diabetes as they experience" + 
+      " different symptoms", width/2, 269);
 
       break;
 
@@ -337,6 +340,7 @@ class GText extends GraphicElement {
   PFont font; 
   int fontSize; 
   color fontColor; 
+
 
   GText(float x, float y) {
     super(x, y);

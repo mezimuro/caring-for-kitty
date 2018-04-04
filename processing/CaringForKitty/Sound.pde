@@ -32,8 +32,8 @@ static final String[] soundNames = {
 
 
 class SoundPlayer {
-
   Map<String, SoundFile> sounds = new HashMap();
+
 
   SoundPlayer() {
     for (String soundName : soundNames)

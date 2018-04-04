@@ -35,6 +35,7 @@ abstract class GraphicElement {
   // Stores supported animations, using animation ids as indexes
   Map<String, GraphicElementAnimation> anims = new HashMap();
 
+
   GraphicElement(float x, float y) {
     this.pos = new PVector(x, y);
     this.opacity = 255;
