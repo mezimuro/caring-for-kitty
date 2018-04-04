@@ -141,9 +141,10 @@ class Sensors {
 
       // ## Signal processing ########################################################
 
+      // If the system is not initialized yet
       if (!init) {
-        /*if (proximity == 0)
-         return;  // exit as there is data coming in yet*/
+        if (proximity == 0)
+         return;  // exit as there is data coming in yet
 
         // If this cycle is the first
         if (ticks == 0) 
@@ -154,7 +155,7 @@ class Sensors {
           proximityNormalized = proximity;  // "normalized" means "average over time"
           sliderDelta = slider - sliderPast;  // for measuring slider values difference
 
-          this.init = true;
+          this.init = true; // Init is done, continue operating in normal mode
         }
 
         ticks += 1;
