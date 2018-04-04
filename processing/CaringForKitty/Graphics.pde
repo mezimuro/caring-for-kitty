@@ -304,13 +304,13 @@ class GOverlay extends GraphicElement {
       translate(0, -69); // adjustable horizontal alignment
 
       textFont(fonts.get("primary"), 35);
-      text(catName + " ", width/2, 410.5);
+      text(catName + " ", width/2, 400.5);
 
       if ((frameCount/round(fr/4)) % 2 == 0)
         fill(255); 
       else
         fill(0, 0); 
-      rect(width/2 + textWidth(catName) - textWidth(catName)*0.5, 411.2, 30, -6); 
+      rect(width/2 + textWidth(catName) - textWidth(catName)*0.5 + 2, 401.2, 30, -6); 
 
       popMatrix();     
       break; 
