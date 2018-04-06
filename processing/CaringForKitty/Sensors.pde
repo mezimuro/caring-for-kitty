@@ -165,7 +165,7 @@ class Sensors {
       sliderDelta = slider - sliderPast; 
       sliderDeltaNormalized = ((ticks-1)*sliderDeltaNormalized + sliderDelta) / ticks;
       sliderPast = slider;
-
+    
       if (sliderDelta == 0)
         sliderDeltaNormalized *= 0.95;  // damping when base value is zero (for smooth syringe animation)
 
@@ -182,7 +182,7 @@ class Sensors {
       // if this deviation is persistent enough...
       if (ticks - ticksShift >= 30) 
         // ...and it really looks like there were no objects but now there are
-        if (proximityNormalizedShift > 100.0 && proximityNormalized < 35.0F)
+        if (proximityNormalizedShift > 30.0 && proximityNormalized < 10.0F)
           proximityEvent = true;  // ...fire the proximity event!
 
       // #############################################################################

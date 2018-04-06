@@ -5,7 +5,7 @@
  
  Main Processing applet code.
  
- Version: Milestone 3 alpha
+ Version: Milestone 3 (Final)
  
  
  ============================================================
@@ -68,7 +68,7 @@ void setup() {
   settings.put("framerate", 60);  // fps
   settings.put("sound_enabled", true);
   settings.put("sensors_enabled", true);
-  settings.put("show_debug", true);  
+  settings.put("show_debug", false);  
   settings.put("lock_controls", false);  
   settings.put("cat_name", "Kitty The Cat");  // Default
 
@@ -77,7 +77,14 @@ void setup() {
   frameRate(fr);
 
   fonts = new HashMap();    
-  fonts.put("primary", loadFont("fonts/Skia-Regular_Black-26.vlw"));
+  fonts.put("frutiger12", loadFont("fonts/FrutigerLTStd-Roman-12.vlw"));
+  fonts.put("frutiger14", loadFont("fonts/FrutigerLTStd-Roman-14.vlw"));
+  fonts.put("frutiger18", loadFont("fonts/FrutigerLTStd-Roman-18.vlw"));
+  fonts.put("frutiger24", loadFont("fonts/FrutigerLTStd-Roman-24.vlw"));
+  fonts.put("frutiger35", loadFont("fonts/FrutigerLTStd-Roman-35.vlw"));
+  fonts.put("frutiger48", loadFont("fonts/FrutigerLTStd-Roman-48.vlw"));
+  fonts.put("header", loadFont("fonts/SourceSerifPro-Bold-40.vlw"));
+  fonts.put("header_smaller", loadFont("fonts/SourceSerifPro-Bold-36.vlw"));
   fonts.put("debug", loadFont("fonts/LucidaSans-12.vlw"));
 
   // Insertion order defines elements' z-index (order of draw)
@@ -86,10 +93,10 @@ void setup() {
   graphics.put("infoboard", new GInfoBoard(0, 0));
   graphics.put("barchart", new GBarChart(500, 282));
   graphics.put("heart", new GHeart(695, 167, 98));
-  graphics.put("snack", new GCatFood(70, 182));
+  graphics.put("snack", new GCatFood(45, 126));
   graphics.put("syringe", new GSyringe(399, 540));
   graphics.put("nurse", new GNurse(506, 475));
-  graphics.put("prompt", new GText(120, 417, fonts.get("primary"), 18, color(0)));
+  graphics.put("prompt", new GText(120, 417, fonts.get("frutiger18"), 18, color(0)));
   graphics.put("overlay", new GOverlay());  
   graphics.put("press_enter", new GPressEnter());  
   graphics.put("keyschart", new GKeysChart(27, 796)); 
@@ -270,15 +277,14 @@ void draw() {
 
     // If insulin sequence is not completed by user yet
     if (state != State.ACTION_DONE) {     
-      state = (sensors_enabled && sensors.sliderDelta > 0.0F) | (state == State.ACTION_EXECUTING)
+      state = (sensors_enabled && sensors.sliderDelta > 0) | (state == State.ACTION_EXECUTING)
         ? State.ACTION_EXECUTING : State.IDLE;
 
-      syringe.visible = (state == State.ACTION_EXECUTING) | (sensors.sliderDeltaNormalized > 0.0078F);
+      syringe.visible = (!sensors_enabled && state == State.ACTION_EXECUTING) | (sensors.sliderDeltaNormalized > 0.0078F);
 
       // Insulin flowing process
       if (state == State.ACTION_EXECUTING) {
-        float d = abs((sensors_enabled && sensors.sliderDelta > 0.0F) ? sensors.sliderDelta 
-          : 10) * 0.05 * fraf;  // set flow speeds here     
+        float d = abs(sensors_enabled ? sensors.sliderDelta : 10) * 0.05 * fraf;  // set flow speeds here       
         glucoseLevel -= abs(d);        
         barChart.setLevel(glucoseLevel);
 

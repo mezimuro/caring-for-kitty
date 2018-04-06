@@ -89,17 +89,17 @@ class GBarChart extends GraphicElement {
 
     // markings and labels
     fill(0);
-    textFont(fonts.get("primary"), 14);
-    text("Glucose Level", 27, 16);
-    textFont(fonts.get("primary"), 12);   
+    textFont(fonts.get("frutiger14"), 14);
+    text("Glucose Level", 33.8, 16);
+    textFont(fonts.get("frutiger12"), 12);   
     textAlign(RIGHT);
-    text("0", 12, 3);
-    text("50", 12, -32);
-    text("100", 12, -67);
-    text("150", 12, -102);
-    text("200", 12, -137);
+    text("0", 12, 4);
+    text("50", 12, -31);
+    text("100", 12, -66);
+    text("150", 12, -101);
+    text("200", 12, -136);
     textAlign(LEFT);
-    text("mg/dl", 11, -170);
+    text("mg/dl", 12, -170);
   }
 
   float mapLevel(float glucoseLevel) {
@@ -285,44 +285,44 @@ class GOverlay extends GraphicElement {
     fill(255);
     switch (state) {
     case "welcome":
-      textFont(fonts.get("primary"), 40);
-      text("WELCOME", width/2, 203);
+      textFont(fonts.get("header"), 40);
+      text("WELCOME", width/2, 204);
 
-      textFont(fonts.get("primary"), 18);  
+      textFont(fonts.get("frutiger18"), 18);  
       textLeading(30);
       text("Caring for Kitty is an interactive program that allows\nthe user to" +
-      " assist an animated character with\ntype 1 diabetes as they experience" + 
-      " different symptoms", width/2, 269);
+        " assist an animated character with\ntype 1 diabetes as they experience" + 
+        " different symptoms.", width/2, 269);
 
       break;
 
     case "enter_cat_name":
-      textFont(fonts.get("primary"), 40);
-      text("ENTER CAT'S NAME", width/2, 200);
+      textFont(fonts.get("header"), 40);
+      text("ENTER CAT'S NAME", width/2, 204);
 
       pushMatrix();
       translate(0, -69); // adjustable horizontal alignment
 
-      textFont(fonts.get("primary"), 35);
+      textFont(fonts.get("frutiger35"), 35);
       text(catName + " ", width/2, 400.5);
 
       if ((frameCount/round(fr/4)) % 2 == 0)
         fill(255); 
       else
         fill(0, 0); 
-      rect(width/2 + textWidth(catName) - textWidth(catName)*0.5 + 2, 401.2, 30, -6); 
+      rect(width/2 + textWidth(catName) - textWidth(catName)*0.5 + 2, 400.7, 20, -5); 
 
       popMatrix();     
       break; 
 
     case "congratulations": 
-      textFont(fonts.get("primary"), 30); 
-      text("* CERTIFICATE OF COMPLETION *", width/2, 200); 
+      textFont(fonts.get("header_smaller"), 36);
+      text("* CERTIFICATE OF COMPLETION *", width/2, 203); 
 
-      textFont(fonts.get("primary"), 36); 
+      textFont(fonts.get("frutiger35"), 36); 
       text("Game Passed!", width/2, 340); 
 
-      textFont(fonts.get("primary"), 18); 
+      textFont(fonts.get("frutiger18"), 18); 
       text(catName + " is happy and healthy and you are\nwell informed now on type one diabetes!", width/2, 394); 
 
       break;
@@ -385,7 +385,7 @@ class GPressEnter extends GraphicElement {
       fill(0, 0); 
 
     textAlign(CENTER); 
-    textFont(fonts.get("primary"), 24); 
+    textFont(fonts.get("frutiger24"), 24); 
     text("Press Enter to continue", width/2, 0); 
     textAlign(LEFT);
   }
@@ -415,7 +415,7 @@ class GSyringe extends GraphicElement {
 
     // image subtitle
     fill(0, opacity); 
-    textFont(fonts.get("primary"), 40); 
+    textFont(fonts.get("frutiger48"), 48); 
     text("Injecting insulin...", 72, 216);
   }
 }
@@ -472,8 +472,8 @@ class GNurse extends GraphicElement {
 class GCatFood extends GraphicElement {
 
   GCatFood(float x, float y) {
-    super(x, y, 0.15); 
-    this.images.put("main", loadImage("images/food.png"));
+    super(x, y, 0.5); 
+    this.images.put("main", loadImage("images/mouse.png"));
     this.anims.put("fade_in", new AnimationFadeIn());
   }
 
@@ -499,7 +499,7 @@ class GCatFood extends GraphicElement {
 // #############################################################################
 
 class GDebug extends GraphicElement {
-  
+
   GDebug() {
     super(0, 0);
   }
@@ -508,9 +508,9 @@ class GDebug extends GraphicElement {
     fill(30);
     textFont(fonts.get("debug"), 12);
     textLeading(15);
-    
+
     text("FPS: " + round(frameRate) + "\nmouseX: " + (mouseX) + ", mouseY: " +
-    (mouseY) + "\n\nport: " + sensors.portName + "\nslider: " + sensors.slider 
-    + "\nproximity: " + sensors.proximity + "\nforce: " + sensors.force , 5, 15);
+      (mouseY) + "\n\nport: " + sensors.portName + "\nslider: " + sensors.slider 
+      + "\nproximity: " + sensors.proximity + "\nforce: " + sensors.force, 5, 15);
   }
 }
